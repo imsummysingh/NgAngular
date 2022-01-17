@@ -11,15 +11,29 @@
 <!-- <p>{{allowNewServer}}</p>
 <p [innerText]="allowNewServer"></p> -->
 
-<p>{{serverCreationStatus}}</p>
+<!-- <p>{{serverCreationStatus}}</p> -->
 
-<app-server></app-server>
-<app-server></app-server>
+<p *ngIf="serverCreated; else noServer">Server was Created, Server name is {{serverName}}</p>
+<ng-template #noServer>
+    <p>
+        No server was created!
+    </p>
+</ng-template>
 
-<hr>
+<app-server *ngFor="let server of servers"></app-server>
+
+<!-- <hr>
 <h3>Assignment</h3>
 
 <input type="text" class="form-control" [(ngModel)]="username">
 <p>username is : {{username}}</p>
 
-<button class="btn btn-primary" [disabled]="username===''" (click)="onReset()">Reset Username</button>
+<button class="btn btn-primary" [disabled]="username===''" (click)="onReset()">Reset Username</button> -->
+
+
+<hr>
+<hr>
+
+<button class="btn btn-primary" (click)="onToggle()">Display Details</button>
+<p *ngIf="paragraphToggle">Secret Password = tuna</p>
+<div *ngFor="let logItem of log" [ngStyle]="{backgroundColor:logItem>=5?'blue':'transparent'}" [ngClass]="{'white-text':logItem>=5}">{{ logItem }}</div>
