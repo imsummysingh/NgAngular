@@ -1,25 +1,65 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { UserService } from './user.service';
+import { Component, ViewChild } from '@angular/core';
+import { NgForm } from '@angular/forms';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit, OnDestroy {
-  userActivated=false;
-  private activeSub: Subscription;
+export class AppComponent {
 
-  constructor(private userService: UserService) {}
+  @ViewChild('f') signupForm:NgForm;
+  defaultQuestion='pet';
+  answer='';
+  genders=['male','female'];
 
-  ngOnInit() {
-    this.activeSub = this.userService.activatedEmitter.subscribe(didActivate=>{
-      this.userActivated=didActivate;
+  user={
+    username:'',
+    email:'',
+    secretQuestion:'',
+    answer:'',
+    gender:''
+  }
+
+  submitted=false;
+
+  suggestUserName() {
+    const suggestedName = 'Superuser';
+
+    //setting value
+    /* this.signupForm.setValue({
+      userData:{
+        username: suggestedName,
+        email:''
+      },
+      secret:'pet',
+      questionAnswer:'',
+      gender:'male'
+    }); */
+
+
+    //patch value
+    this.signupForm.form.patchValue({
+      userData:{
+        username:suggestedName
+      }
     });
   }
 
-  ngOnDestroy(): void {
-      this.activeSub.unsubscribe();
+  // onSubmit(form:NgForm){
+  //   console.log(form);
+  // }
+
+  onSubmit(){
+    //console.log(this.signupForm);
+
+    this.submitted=true;
+    this.user.username=this.signupForm.value.userData.username;
+    this.user.email=this.signupForm.value.userData.email;
+    this.user.secretQuestion=this.signupForm.value.secret;
+    this.user.answer=this.signupForm.value.questionAnswer;
+    this.user.gender = this.signupForm.value.gender;
+  
+    this.signupForm.reset();
   }
 }
