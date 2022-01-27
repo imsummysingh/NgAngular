@@ -1,61 +1,69 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { map, Subscription } from 'rxjs';
+import { Post } from './post.model';
+import { PostsService } from './post.service';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent {
+export class AppComponent implements OnInit, OnDestroy {
+  loadedPosts:Post[] = [];
+  isFetching=false;
+  error=null;
+  private errorSub: Subscription;
 
-  appStatus = new Promise((resolve, reject)=>{
-    setTimeout(() => {
-      resolve('stable');
-    }, 2000);
-  });
+  constructor(private http: HttpClient, private postService:PostsService) {}
 
-  servers = [
-    {
-      instanceType: 'medium',
-      name: 'Production',
-      status: 'stable',
-      started: new Date(15, 1, 2017)
-    },
-    {
-      instanceType: 'large',
-      name: 'User Database',
-      status: 'stable',
-      started: new Date(15, 1, 2017)
-    },
-    {
-      instanceType: 'small',
-      name: 'Development Server',
-      status: 'offline',
-      started: new Date(15, 1, 2017)
-    },
-    {
-      instanceType: 'small',
-      name: 'Testing Environment Server',
-      status: 'stable',
-      started: new Date(15, 1, 2017)
-    }
-  ];
+  ngOnInit() {
 
-  filteredStatus='';
+    this.errorSub = this.postService.error.subscribe(errorMessage=>{
+      this.error=errorMessage;
+    })
 
-  getStatusClasses(server: {instanceType: string, name: string, status: string, started: Date}) {
-    return {
-      'list-group-item-success': server.status === 'stable',
-      'list-group-item-warning': server.status === 'offline',
-      'list-group-item-danger': server.status === 'critical'
-    };
-  }
-
-  onAddServer(){
-    this.servers.push({
-      instanceType:'small',
-      name:'New Server',
-      status:'stable',
-      started: new Date(15,1,2017)
+    this.isFetching=true;
+    this.postService.fetchPosts().subscribe(posts=>{
+      this.isFetching=false;
+      this.loadedPosts=posts;
+    }, error=>{
+      this.isFetching=false;
+      this.error=error.message;
     });
   }
+
+  onCreatePost(postData: Post) {
+    // Send Http request
+    //console.log(postData);
+    this.postService.createAndStorePost(postData.title,postData.content);
+  }
+
+  onFetchPosts() {
+    // Send Http request
+    this.isFetching=true;
+    this.postService.fetchPosts().subscribe(posts=>{
+      this.isFetching=false;
+      this.loadedPosts=posts;
+    }, error=>{
+      this.isFetching=false;
+      this.error=error.message;
+    });
+  }
+
+  onClearPosts() {
+    // Send Http request
+    this.postService.deletePosts().subscribe(()=>{
+      this.loadedPosts=[];
+    });
+  }
+
+  onHandleError(){
+    this.error=null;
+  }
+
+  ngOnDestroy(): void {
+      this.errorSub.unsubscribe();
+  }
+
 }
