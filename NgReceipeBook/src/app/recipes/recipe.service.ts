@@ -25,10 +25,17 @@ export class RecipeService{
             new Ingredient('Meat',1)
         ])
       ];
+
+    //private recipes:Recipe[]=[];  
     
     constructor(private slService: ShoppingListService){
-
     }  
+
+    //to override recipe through firebase
+    setRecipes(recipes:Recipe[]){
+        this.recipes = recipes;
+        this.recipesChanged.next(this.recipes.slice());
+    }
 
     getRecipes(){
         return this.recipes.slice();        //return new array
